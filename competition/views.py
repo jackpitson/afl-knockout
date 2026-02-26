@@ -6,6 +6,14 @@ from django.contrib.auth import login
 
 from .models import Round, Match, Player, Tip, Team
 
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+
+def home(request):
+    if request.user.is_authenticated:
+        return redirect("submit_tip")
+    return redirect("login")
+
 
 def signup(request):
     if request.method == "POST":
