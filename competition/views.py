@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 def home(request):
     if request.user.is_authenticated:
         return redirect("submit_tip")
-    return redirect("login")
+    return render(request, "home.html")
 
 
 def signup(request):
@@ -30,7 +30,7 @@ def signup(request):
 
 @login_required
 def submit_tip(request):
-    player = Player.objects.get(user=request.user)
+    player, created = Player.objects.get_or_create(user=request.user)
     current_round = Round.objects.filter(completed=False).first()
     matches = Match.objects.filter(round=current_round)
 
