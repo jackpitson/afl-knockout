@@ -1,0 +1,29 @@
+{% if messages %}
+    {% for message in messages %}
+        <p style="color: green;">{{ message }}</p>
+    {% endfor %}
+{% endif %}
+
+
+<h1>Pick your winner for {{ round }}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% for match in matches %}
+        <h3>{{ match.home_team }} vs {{ match.away_team }}</h3>
+
+        <label>
+            <input type="radio" name="team" value="{{ match.home_team.id }}">
+            {{ match.home_team }}
+        </label>
+
+        <label>
+            <input type="radio" name="team" value="{{ match.away_team.id }}">
+            {{ match.away_team }}
+        </label>
+    {% endfor %}
+
+    <br><br>
+    <button type="submit">Submit Tip</button>
+</form>
