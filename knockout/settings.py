@@ -120,7 +120,7 @@ USE_TZ = True
 
 
 STATIC_URL = "/static/"
-STATIC_ROOT = Path("/opt/render/project/src/staticfiles")
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 LOGIN_REDIRECT_URL = '/tip/'
 LOGIN_URL = '/login/'
