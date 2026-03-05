@@ -1,40 +1,83 @@
+{% load extras %}
 <h1>Leaderboard</h1>
 
+<h2>Round {{ rounds.last.number }} Leaderboard</h2>
+
+<p>
+<strong>Players remaining:</strong>
+{{ alive_players }} / {{ total_players }}
+</p>
+
 <table border="1" cellpadding="6">
-    <tr>
-        <th>Player</th>
+<tr>
+<th>Player</th>
 
-        {% for round in rounds %}
-            <th>Round {{ round.id }}</th>
-        {% endfor %}
+{% for round in rounds %}
+<th>R{{ round.number }}</th>
+{% endfor %}
 
-        <th>Status</th>
-    </tr>
+<th>Status</th>
+</tr>
 
-    {% for player in players %}
-    <tr>
+{% for player in players %}
 
-        <td>{{ player.user.username }}</td>
+<tr {% if player.eliminated %}style="background:#ffdddd"{% endif %}>
 
-        {% for round in rounds %}
-            <td>
-                {% for tip in player.tip_set.all %}
-                    {% if tip.round.id == round.id %}
-                        {{ tip.team.name }}
-                    {% endif %}
-                {% endfor %}
-            </td>
-        {% endfor %}
+<td>{{ player.user.username }}</td>
 
-        <td>
-            {% if player.eliminated %}
-                ❌ Eliminated
+{% for round in rounds %}
+<td>
+
+{% with tip=tip_lookup|get_item:player.id|get_item:round.id %}
+
+{% if round.id == current_round.id and not round_locked %}
+
+🔒
+
+{% else %}
+
+    {% if tip %}
+
+        {% with winner=winner_lookup|get_item:round.id %}
+
+            {% if winner %}
+
+                {% if tip.team.id == winner %}
+                    <span style="color:green">✅ {{ tip.team.name }} ({{ tip.margin }})</span>
+                {% else %}
+                    <span style="color:red">❌ {{ tip.team.name }} ({{ tip.margin }})</span>
+                {% endif %}
+
             {% else %}
-                ✅ Alive
+
+                {{ tip.team.name }}{% if tip.margin %} ({{ tip.margin }}){% endif %}
+
             {% endif %}
-        </td>
 
-    </tr>
-    {% endfor %}
+        {% endwith %}
 
+    {% else %}
+        —
+    {% endif %}
+
+{% endif %}
+
+{% endwith %}
+
+</td>
+{% endfor %}
+
+<td>
+
+{% if player.eliminated %}
+<span style="color:red">Eliminated</span>
+{% else %}
+<span style="color:green">Alive</span>
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
 </table>

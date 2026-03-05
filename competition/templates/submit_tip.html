@@ -4,27 +4,91 @@
     {% endfor %}
 {% endif %}
 
+<h2>Round {{ round.number }}</h2>
 
+<p>
+Tips close in: <strong><span id="countdown"></span></strong>
+</p>
 <h1>Pick your winner for {{ round }}</h1>
 
 <form method="post">
-    {% csrf_token %}
+{% csrf_token %}
 
-    {% for match in matches %}
-        <h3>{{ match.home_team }} vs {{ match.away_team }}</h3>
+{% for match in matches %}
 
-        <label>
-            <input type="radio" name="team" value="{{ match.home_team.id }}">
-            {{ match.home_team }}
-        </label>
+<h3>{{ match.team1 }} vs {{ match.team2 }}</h3>
 
-        <label>
-            <input type="radio" name="team" value="{{ match.away_team.id }}">
-            {{ match.away_team }}
-        </label>
-    {% endfor %}
+<label>
+<input type="radio" name="team" value="{{ match.team1.id }}"
+{% if match.team1_used %}disabled{% endif %}>
+{{ match.team1 }}
+{% if match.team1_used %} ❌ already used{% endif %}
+</label>
 
-    <br><br>
-    <button type="submit">Submit Tip</button>
-    <a href="/leaderboard/">View leaderboard</a>
+<label>
+<input type="radio" name="team" value="{{ match.team2.id }}"
+{% if match.team2_used %}disabled{% endif %}>
+{{ match.team2 }}
+{% if match.team2_used %} ❌ already used{% endif %}
+</label>
+
+<br><br>
+
+{% endfor %}
+
+<br>
+
+<label>Scammas Crazy Margin:</label>
+<input type="number" name="margin" min="1" max="200" required>
+
+<br><br>
+
+<button id="submit-tip" type="submit">Submit Tip</button>
+
+<br><br>
+<a href="/leaderboard/">View leaderboard</a>
+
 </form>
+
+<script>
+
+const lockoutTime = new Date("{{ round.lockout_time|date:'c' }}").getTime();
+
+function updateCountdown() {
+
+    const now = Date.now();
+    const distance = lockoutTime - now;
+
+    const countdown = document.getElementById("countdown");
+
+    if (distance <= 0) {
+
+        countdown.innerHTML = "TIPS CLOSED";
+
+        // stop timer
+        clearInterval(timer);
+
+        // disable all radio buttons
+        document.querySelectorAll("input[type='radio']").forEach(r => r.disabled = true);
+
+        // disable submit button
+        const button = document.getElementById("submit-tip");
+        if (button) {
+            button.disabled = true;
+            button.innerText = "Tips Closed";
+        }
+
+        return;
+    }
+
+    const hours = Math.floor(distance / (1000*60*60));
+    const minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
+    const seconds = Math.floor((distance % (1000*60)) / 1000);
+
+    countdown.innerHTML = hours + "h " + minutes + "m " + seconds + "s";
+}
+
+const timer = setInterval(updateCountdown, 1000);
+updateCountdown();
+
+</script>
