@@ -65,3 +65,21 @@ def submit_tip(request):
         'matches': matches,
         'round': current_round,
     })
+
+@login_required
+def leaderboard(request):
+    players = Player.objects.select_related("user").all()
+    rounds = Round.objects.order_by("id")
+
+    tips = Tip.objects.select_related("team", "round", "player")
+
+    # build lookup dictionary: tips[player][round]
+    tip_lookup = {}
+    for tip in tips:
+        tip_lookup.setdefault(tip.player_id, {})[tip.round_id] = tip
+
+    return render(request, "leaderboard.html", {
+        "players": players,
+        "rounds": rounds,
+        "tip_lookup": tip_lookup,
+    })

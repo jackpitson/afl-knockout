@@ -1,0 +1,40 @@
+<h1>Leaderboard</h1>
+
+<table border="1" cellpadding="6">
+    <tr>
+        <th>Player</th>
+
+        {% for round in rounds %}
+            <th>Round {{ round.id }}</th>
+        {% endfor %}
+
+        <th>Status</th>
+    </tr>
+
+    {% for player in players %}
+    <tr>
+
+        <td>{{ player.user.username }}</td>
+
+        {% for round in rounds %}
+            <td>
+                {% for tip in player.tip_set.all %}
+                    {% if tip.round.id == round.id %}
+                        {{ tip.team.name }}
+                    {% endif %}
+                {% endfor %}
+            </td>
+        {% endfor %}
+
+        <td>
+            {% if player.eliminated %}
+                ❌ Eliminated
+            {% else %}
+                ✅ Alive
+            {% endif %}
+        </td>
+
+    </tr>
+    {% endfor %}
+
+</table>
