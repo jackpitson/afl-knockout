@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Player, Team, Round, Match, Tip 
-from django.db import transaction
+from .models import Player, Team, Round, Match, Tip
+
 
 @admin.action(description="Process selected round")
 def process_round(modeladmin, request, queryset):
@@ -20,28 +20,15 @@ def process_round(modeladmin, request, queryset):
 
         for tip in tips:
 
-            # Find the match the tipped team played in
-            match = matches.filter(team1=tip.team).first()
+            match = matches.filter(team1=tip.team).first() or matches.filter(team2=tip.team).first()
 
-            if not match:
-                match = matches.filter(team2=tip.team).first()
-
-            if not match:
-                continue
-
-            # If tipped team didn't win → eliminate
-            if match.winner != tip.team:
-                player = tip.player
-                player.eliminated = True
-                player.save()
+            if match and match.winner != tip.team:
+                tip.player.eliminated = True
+                tip.player.save()
 
         round_obj.completed = True
         round_obj.save()
 
-@admin.register(Round)
-class RoundAdmin(admin.ModelAdmin):
-    list_display = ("number", "completed", "lockout_time")
-    actions = [process_round]
 
 class TipInline(admin.TabularInline):
     model = Tip
@@ -49,12 +36,17 @@ class TipInline(admin.TabularInline):
     readonly_fields = ["player", "team"]
 
 
+@admin.register(Round)
 class RoundAdmin(admin.ModelAdmin):
+    list_display = ("number", "completed", "lockout_time")
+    actions = [process_round]
     inlines = [TipInline]
 
+
 class TipAdmin(admin.ModelAdmin):
-    list_display = ["player", "round", "team"]
+    list_display = ["player", "round", "team", "margin"]
     list_filter = ["round"]
+
 
 admin.site.register(Player)
 admin.site.register(Team)
