@@ -4,7 +4,7 @@ from django.db import models
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-
+from django.db import transaction
 
 class Team(models.Model):
     name = models.CharField(max_length=100)
@@ -48,16 +48,47 @@ def save(self, *args, **kwargs):
     super().save(*args, **kwargs)
 
     if self.winner:
-        from .models import Tip
-
         tips = Tip.objects.filter(round=self.round)
 
         for tip in tips:
-            if tip.team != self.winner:
-                tip.player.eliminated = True
-                tip.player.save()
+            # find the match that the tipped team played in
+            match = Match.objects.filter(
+                round=self.round
+            ).filter(
+                team1=tip.team
+            ) | Match.objects.filter(
+                round=self.round,
+                team2=tip.team
+            )
 
-    def __str__(self):
+            match = match.first()
+
+            if match and match.winner != tip.team:
+                player = tip.player
+                player.eliminated = True
+                player.save()
+
+def process_round(round_obj):
+
+    matches = Match.objects.filter(round=round_obj)
+    tips = Tip.objects.filter(round=round_obj)
+
+    winners = [m.winner for m in matches if m.winner]
+
+    with transaction.atomic():
+
+        for tip in tips:
+
+            if tip.team not in winners:
+                player = tip.player
+                player.eliminated = True
+                player.save()
+
+        round_obj.completed = True
+        round_obj.save()
+
+
+def __str__(self):
         return f"{self.home_team} vs {self.away_team}"
 
 
