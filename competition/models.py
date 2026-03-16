@@ -1,10 +1,7 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.db import transaction
+
 
 class Team(models.Model):
     name = models.CharField(max_length=100)
@@ -24,72 +21,15 @@ class Round(models.Model):
     def __str__(self):
         return f"Round {self.number}"
 
+
 class Match(models.Model):
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
     team1 = models.ForeignKey(Team, related_name="team1", on_delete=models.CASCADE)
     team2 = models.ForeignKey(Team, related_name="team2", on_delete=models.CASCADE)
     winner = models.ForeignKey(Team, null=True, blank=True, on_delete=models.SET_NULL)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        if self.winner:
-            from .models import Tip
-
-            tips = Tip.objects.filter(round=self.round)
-
-            for tip in tips:
-                if tip.team != self.winner:
-                    player = tip.player
-                    player.eliminated = True
-                    player.save()
-
-def save(self, *args, **kwargs):
-    super().save(*args, **kwargs)
-
-    if self.winner:
-        tips = Tip.objects.filter(round=self.round)
-
-        for tip in tips:
-            # find the match that the tipped team played in
-            match = Match.objects.filter(
-                round=self.round
-            ).filter(
-                team1=tip.team
-            ) | Match.objects.filter(
-                round=self.round,
-                team2=tip.team
-            )
-
-            match = match.first()
-
-            if match and match.winner != tip.team:
-                player = tip.player
-                player.eliminated = True
-                player.save()
-
-def process_round(round_obj):
-
-    matches = Match.objects.filter(round=round_obj)
-    tips = Tip.objects.filter(round=round_obj)
-
-    winners = [m.winner for m in matches if m.winner]
-
-    with transaction.atomic():
-
-        for tip in tips:
-
-            if tip.team not in winners:
-                player = tip.player
-                player.eliminated = True
-                player.save()
-
-        round_obj.completed = True
-        round_obj.save()
-
-
-def __str__(self):
-        return f"{self.home_team} vs {self.away_team}"
+    def __str__(self):
+        return f"{self.team1} vs {self.team2}"
 
 
 class Player(models.Model):
@@ -99,28 +39,26 @@ class Player(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class Tip(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     margin = models.IntegerField(null=True, blank=True)
 
-    def clean(self):
-        # Check if this player has already picked this team before
-        if Tip.objects.filter(player=self.player, team=self.team).exists():
-            raise ValidationError("You have already picked this team in a previous round.")
-
     class Meta:
-        unique_together = ('player', 'round')
+        unique_together = ("player", "round")
 
     def clean(self):
         if Tip.objects.filter(player=self.player, team=self.team).exclude(round=self.round).exists():
             raise ValidationError("You have already used this team.")
-        
+
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 
 @receiver(post_save, sender=User)
 def create_player(sender, instance, created, **kwargs):
     if created:
-        Player.objects.create(user=instance)       
+        Player.objects.create(user=instance)
