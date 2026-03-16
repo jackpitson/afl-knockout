@@ -10,10 +10,27 @@ def process_round(modeladmin, request, queryset):
         matches = Match.objects.filter(round=round_obj)
         tips = Tip.objects.filter(round=round_obj)
 
-        winners = [m.winner for m in matches if m.winner]
+        # Safety check – make sure every match has a winner
+        if matches.filter(winner=None).exists():
+            modeladmin.message_user(
+                request,
+                "Cannot process round. Some matches do not have a winner yet."
+            )
+            return
 
         for tip in tips:
-            if tip.team not in winners:
+
+            # Find the match the tipped team played in
+            match = matches.filter(team1=tip.team).first()
+
+            if not match:
+                match = matches.filter(team2=tip.team).first()
+
+            if not match:
+                continue
+
+            # If tipped team didn't win → eliminate
+            if match.winner != tip.team:
                 player = tip.player
                 player.eliminated = True
                 player.save()
