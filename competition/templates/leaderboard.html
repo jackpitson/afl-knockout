@@ -38,7 +38,7 @@
 
     {% if tip %}
 
-        {% with winner=winner_lookup|get_item:round.id %}
+        {% with winner=winner_lookup|get_item:tip.team.id %}
 
             {% if winner %}
 

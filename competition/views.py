@@ -112,9 +112,11 @@ def leaderboard(request):
 
     # winner lookup
     winner_lookup = {}
+
     for match in matches:
-        if match.winner:
-            winner_lookup[match.round_id] = match.winner_id
+     if match.winner:
+        winner_lookup[match.team1_id] = match.winner_id
+        winner_lookup[match.team2_id] = match.winner_id
 
     current_round = Round.objects.filter(completed=False).first()
 
