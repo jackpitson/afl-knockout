@@ -75,33 +75,29 @@ tr:nth-child(even) {
     <th>Status</th>
 </tr>
 
-{% for player in players %}
-<tr class="{% if player.eliminated %}eliminated{% else %}alive{% endif %}">
+{% for row in rows %}
+<tr class="{% if row.player.eliminated %}eliminated{% else %}alive{% endif %}">
 
-<td>{{ player.user.username }}</td>
+<td>{{ row.player.user.username }}</td>
 
-{% for round in rounds %}
+{% for item in row.tips %}
 <td>
 
-{% with tip=tip_lookup|get_item:player.id|get_item:round.id %}
-
-{% if round.id == current_round.id and not round_locked %}
-
-<span class="locked">🔒</span>
-
+{% if item.round.id == current_round.id and not round_locked %}
+🔒
 {% else %}
 
-    {% if tip %}
+    {% if item.tip %}
 
-        {% with winner=winner_lookup|get_item:tip.team.id %}
+        {% with winner=winner_lookup.item.tip.team.id %}
 
             {% if not winner %}
-                {{ tip.team.name }}{% if tip.margin %} ({{ tip.margin }}){% endif %}
+                {{ item.tip.team.name }}{% if item.tip.margin %} ({{ item.tip.margin }}){% endif %}
             {% else %}
-                {% if tip.team.id == winner %}
-                    <span class="win">✅ {{ tip.team.name }} ({{ tip.margin }})</span>
+                {% if item.tip.team.id == winner %}
+                    <span class="win">✅ {{ item.tip.team.name }} ({{ item.tip.margin }})</span>
                 {% else %}
-                    <span class="loss">❌ {{ tip.team.name }} ({{ tip.margin }})</span>
+                    <span class="loss">❌ {{ item.tip.team.name }} ({{ item.tip.margin }})</span>
                 {% endif %}
             {% endif %}
 
@@ -113,13 +109,11 @@ tr:nth-child(even) {
 
 {% endif %}
 
-{% endwith %}
-
 </td>
 {% endfor %}
 
 <td>
-{% if player.eliminated %}
+{% if row.player.eliminated %}
 ❌ Eliminated
 {% else %}
 ✅ Alive

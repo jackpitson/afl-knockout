@@ -106,9 +106,23 @@ def leaderboard(request):
     matches = Match.objects.select_related("winner")
 
     # tip lookup
-    tip_lookup = {}
-    for tip in tips:
-        tip_lookup.setdefault(tip.player_id, {})[tip.round_id] = tip
+
+    rows = []
+
+    for player in players:
+        player_row = {
+            "player": player,
+            "tips": []
+        }
+
+        for round in rounds:
+            tip = tips.filter(player=player, round=round).first()
+            player_row["tips"].append({
+                "round": round,
+                "tip": tip
+            })
+
+        rows.append(player_row)
 
     # winner lookup
     winner_lookup = {}
@@ -127,7 +141,7 @@ def leaderboard(request):
     return render(request, "leaderboard.html", {
         "players": players,
         "rounds": rounds,
-        "tip_lookup": tip_lookup,
+        "rows": rows,
         "winner_lookup": winner_lookup,
         "alive_players": alive_players,
         "total_players": total_players,
