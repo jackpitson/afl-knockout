@@ -48,7 +48,7 @@ tr:nth-child(even) {
 }
 
 .loss {
-    color: red;
+    color: red !important;
     font-weight: bold;
 }
 
@@ -64,7 +64,11 @@ tr:nth-child(even) {
     <strong>Players remaining:</strong> {{ alive_players }} / {{ total_players }}
 </div>
 
+
+<span style="color:red;">DEBUG {{ winner }} vs {{ item.tip.team.id }}</span>
+
 <table>
+
 <tr>
     <th>Player</th>
 
@@ -89,7 +93,7 @@ tr:nth-child(even) {
 
     {% if item.tip %}
 
-        {% with winner=winner_lookup.item.tip.team.id %}
+        {% with winner=item.winner %}
 
             {% if not winner %}
                 {{ item.tip.team.name }}{% if item.tip.margin %} ({{ item.tip.margin }}){% endif %}
@@ -97,7 +101,7 @@ tr:nth-child(even) {
                 {% if item.tip.team.id == winner %}
                     <span class="win">✅ {{ item.tip.team.name }} ({{ item.tip.margin }})</span>
                 {% else %}
-                    <span class="loss">❌ {{ item.tip.team.name }} ({{ item.tip.margin }})</span>
+                    <span class="loss" style="color:red;">❌ {{ item.tip.team.name }} ({{ item.tip.margin }})</span>
                 {% endif %}
             {% endif %}
 

@@ -117,12 +117,28 @@ def leaderboard(request):
 
         for round in rounds:
             tip = tips.filter(player=player, round=round).first()
+
+            winner = None
+
+            if tip:
+                match = Match.objects.filter(
+                    round=round,
+                    team1=tip.team
+                ).first() or Match.objects.filter(
+                    round=round,
+                    team2=tip.team
+                ).first()
+
+                if match and match.winner:
+                    winner = match.winner_id
+
             player_row["tips"].append({
                 "round": round,
-                "tip": tip
+                "tip": tip,
+                "winner": winner
             })
 
-        rows.append(player_row)
+        rows.append(player_row) 
 
     # winner lookup
     winner_lookup = {}
