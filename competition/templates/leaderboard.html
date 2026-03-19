@@ -1,27 +1,82 @@
-{% load extras %}
-<h1>Leaderboard</h1>
+<style>
+body {
+    font-family: Arial, sans-serif;
+}
 
-<h2>Round {{ rounds.last.number }} Leaderboard</h2>
+h1 {
+    text-align: center;
+}
 
-<p>
-<strong>Players remaining:</strong>
-{{ alive_players }} / {{ total_players }}
-</p>
+.summary {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-<table border="1" cellpadding="6">
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th {
+    background-color: #222;
+    color: white;
+    padding: 10px;
+}
+
+td {
+    padding: 8px;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background-color: #f5f5f5;
+}
+
+.alive {
+    background-color: #e8f5e9;
+}
+
+.eliminated {
+    background-color: #ffebee;
+    opacity: 0.8;
+}
+
+.win {
+    color: green;
+    font-weight: bold;
+}
+
+.loss {
+    color: red;
+    font-weight: bold;
+}
+
+.locked {
+    color: #999;
+}
+
+</style>
+
+<h1>🏆 AFL Knockout Leaderboard</h1>
+
+<div class="summary">
+    <strong>Players remaining:</strong> {{ alive_players }} / {{ total_players }}
+</div>
+
+<table>
 <tr>
-<th>Player</th>
+    <th>Player</th>
 
-{% for round in rounds %}
-<th>R{{ round.number }}</th>
-{% endfor %}
+    {% for round in rounds %}
+        <th>R{{ round.number }}</th>
+    {% endfor %}
 
-<th>Status</th>
+    <th>Status</th>
 </tr>
 
 {% for player in players %}
-
-<tr {% if player.eliminated %}style="background:#ffdddd"{% endif %}>
+<tr class="{% if player.eliminated %}eliminated{% else %}alive{% endif %}">
 
 <td>{{ player.user.username }}</td>
 
@@ -32,7 +87,7 @@
 
 {% if round.id == current_round.id and not round_locked %}
 
-🔒
+<span class="locked">🔒</span>
 
 {% else %}
 
@@ -40,18 +95,14 @@
 
         {% with winner=winner_lookup|get_item:tip.team.id %}
 
-            {% if winner %}
-
-                {% if tip.team.id == winner %}
-                    <span style="color:green">✅ {{ tip.team.name }} ({{ tip.margin }})</span>
-                {% else %}
-                    <span style="color:red">❌ {{ tip.team.name }} ({{ tip.margin }})</span>
-                {% endif %}
-
-            {% else %}
-
+            {% if not winner %}
                 {{ tip.team.name }}{% if tip.margin %} ({{ tip.margin }}){% endif %}
-
+            {% else %}
+                {% if tip.team.id == winner %}
+                    <span class="win">✅ {{ tip.team.name }} ({{ tip.margin }})</span>
+                {% else %}
+                    <span class="loss">❌ {{ tip.team.name }} ({{ tip.margin }})</span>
+                {% endif %}
             {% endif %}
 
         {% endwith %}
@@ -68,16 +119,13 @@
 {% endfor %}
 
 <td>
-
 {% if player.eliminated %}
-<span style="color:red">Eliminated</span>
+❌ Eliminated
 {% else %}
-<span style="color:green">Alive</span>
+✅ Alive
 {% endif %}
-
 </td>
 
 </tr>
-
 {% endfor %}
 </table>
