@@ -1,7 +1,27 @@
+{% load static %}
 <style>
+
+.top-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.top-bar a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.top-bar a:hover {
+    text-decoration: underline;
+}
+
 body {
     font-family: Arial, sans-serif;
 }
+
+
 
 h1 {
     text-align: center;
@@ -57,6 +77,10 @@ tr:nth-child(even) {
 }
 
 </style>
+
+<div class="top-bar">
+    <a href="{% static 'images/monkey.png' %}" target="_blank">Tech Support</a>
+</div>
 
 <h1>🏆 AFL Knockout Leaderboard</h1>
 
