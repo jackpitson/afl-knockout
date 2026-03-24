@@ -1,83 +1,186 @@
+{% load static %}
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+}
+
+.container {
+    max-width: 700px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+.message {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.match {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.team-option {
+    display: block;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.team-option:hover {
+    background: #f0f0f0;
+}
+
+.team-option input {
+    margin-right: 10px;
+}
+
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.margin-input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+button:disabled {
+    background: #999;
+}
+
+.countdown {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.links {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.links a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<div class="container">
+
 {% if messages %}
     {% for message in messages %}
-        <p style="color: green;">{{ message }}</p>
+        <div class="message">{{ message }}</div>
     {% endfor %}
 {% endif %}
 
 <h2>Round {{ round.number }}</h2>
 
-<p>
-Tips close in: <strong><span id="countdown"></span></strong>
-</p>
-<h1>Pick your winner for {{ round }}</h1>
+<div class="countdown">
+    Tips close in: <strong><span id="countdown"></span></strong>
+</div>
+
+<h1>Pick your winner</h1>
 
 <form method="post">
 {% csrf_token %}
 
 {% for match in matches %}
 
-<h3>{{ match.team1 }} vs {{ match.team2 }}</h3>
+<div class="match">
+    <strong>{{ match.team1 }} vs {{ match.team2 }}</strong>
 
-<label>
-<input type="radio" name="team" value="{{ match.team1.id }}"
-{% if match.team1_used %}disabled{% endif %}>
-{{ match.team1 }}
-{% if match.team1_used %} ❌ already used{% endif %}
-</label>
+    <label class="team-option {% if match.team1_used %}disabled{% endif %}">
+        <input type="radio" name="team" value="{{ match.team1.id }}"
+        {% if match.team1_used %}disabled{% endif %}>
+        {{ match.team1 }}
+        {% if match.team1_used %} ❌ already used{% endif %}
+    </label>
 
-<label>
-<input type="radio" name="team" value="{{ match.team2.id }}"
-{% if match.team2_used %}disabled{% endif %}>
-{{ match.team2 }}
-{% if match.team2_used %} ❌ already used{% endif %}
-</label>
-
-<br><br>
+    <label class="team-option {% if match.team2_used %}disabled{% endif %}">
+        <input type="radio" name="team" value="{{ match.team2.id }}"
+        {% if match.team2_used %}disabled{% endif %}>
+        {{ match.team2 }}
+        {% if match.team2_used %} ❌ already used{% endif %}
+    </label>
+</div>
 
 {% endfor %}
 
-<br>
-
-<label>Scammas Crazy Margin:</label>
-<input type="number" name="margin" min="1" max="200" required>
+<label>Margin (tie-breaker):</label>
+<input class="margin-input" type="number" name="margin" min="1" max="200" required>
 
 <br><br>
 
 <button id="submit-tip" type="submit">Submit Tip</button>
 
-<br><br>
-<a href="/leaderboard/">View leaderboard</a>
-
 </form>
 
-<script>
+<div class="links">
+    <a href="/leaderboard/">View Leaderboard</a> |
+    <a href="{% static 'images/monkey.png' %}" target="_blank">Tech Support</a>
+</div>
 
+</div>
+
+<script>
 const lockoutTime = new Date("{{ round.lockout_time|date:'c' }}").getTime();
 
 function updateCountdown() {
-
     const now = Date.now();
     const distance = lockoutTime - now;
-
     const countdown = document.getElementById("countdown");
 
     if (distance <= 0) {
-
-        countdown.innerHTML = "TIPS CLOSED";
-
-        // stop timer
+        countdown.innerHTML = "🔒 TIPS CLOSED";
         clearInterval(timer);
 
-        // disable all radio buttons
         document.querySelectorAll("input[type='radio']").forEach(r => r.disabled = true);
 
-        // disable submit button
         const button = document.getElementById("submit-tip");
         if (button) {
             button.disabled = true;
             button.innerText = "Tips Closed";
         }
-
         return;
     }
 
@@ -90,5 +193,4 @@ function updateCountdown() {
 
 const timer = setInterval(updateCountdown, 1000);
 updateCountdown();
-
 </script>
