@@ -124,6 +124,9 @@ button:disabled {
 <form method="post">
 {% csrf_token %}
 
+
+
+
 {% for match in matches %}
 
 <div class="match">
@@ -151,7 +154,45 @@ button:disabled {
 
 <br><br>
 
-<button id="submit-tip" type="submit">Submit Tip</button>
+<div id="overlay" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+z-index:999;
+"></div>
+
+<!-- ROBOT POPUP (must be ABOVE overlay z-index) -->
+<div id="robot-check" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 20px rgba(0,0,0,0.3);
+z-index:1000;
+">
+
+    <h3>Dodgiest Bloke</h3>
+
+    <label><input type="radio" name="robot_answer" value="1"> 1. Nashy</label><br>
+    <label><input type="radio" name="robot_answer" value="2"> 2. Herbert the Pervert</label><br>
+    <label><input type="radio" name="robot_answer" value="3"> 3. Netanyahu (Big Yahu)</label><br><br>
+
+    <button type="button" onclick="checkRobot()">Confirm</button>
+
+    <p id="robot-error" style="color:red; display:none;"></p>
+
+</div>
+
+
+<button id="submit-tip" type="button" onclick="showRobotCheck()">Submit Tip</button>
 
 </form>
 
@@ -193,4 +234,37 @@ function updateCountdown() {
 
 const timer = setInterval(updateCountdown, 1000);
 updateCountdown();
+
+function showRobotCheck() {
+    document.getElementById("robot-check").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+}
+
+document.getElementById("overlay").onclick = function() {
+    this.style.display = "none";
+    document.getElementById("robot-check").style.display = "none";
+};
+function checkRobot() {
+    const selected = document.querySelector("input[name='robot_answer']:checked");
+    const error = document.getElementById("robot-error");
+
+    if (!selected) {
+        error.innerText = "Pick an answer first.";
+        error.style.display = "block";
+        return;
+    }
+
+    if (selected.value === "1") {
+        // ✅ correct → submit form
+        document.querySelector("form").requestSubmit();
+    } else {
+        // ❌ wrong → just reset + let them try again
+        error.innerText = "Wrong answer. Try again.";
+        error.style.display = "block";
+
+        // clear selection so they must pick again
+        document.querySelectorAll("input[name='robot_answer']").forEach(r => r.checked = false);
+    }
+}
+
 </script>

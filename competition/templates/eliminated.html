@@ -1,8 +1,89 @@
 <h2>You have been eliminated</h2>
 
-<p>
-You are out dog
-</p>
+<p>You are out dog</p>
 
+<!-- OVERLAY -->
+<div id="overlay" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+z-index:999;
+"></div>
 
+<!-- POPUP -->
+<div id="robot-check" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 20px rgba(0,0,0,0.3);
+z-index:1000;
+">
+
+    <h3>Dodgiest Bloke</h3>
+
+    <label><input type="radio" name="robot_answer" value="1"> 1. Nashy</label><br>
+    <label><input type="radio" name="robot_answer" value="2"> 2. Herbert the Pervert</label><br>
+    <label><input type="radio" name="robot_answer" value="3"> 3. Netanyahu (Big Yahu)</label><br><br>
+
+    <button type="button" onclick="checkRobot()">Confirm</button>
+
+    <p id="robot-error" style="color:red; display:none;"></p>
+
+</div>
+
+<button type="button" onclick="showRobotCheck()">Dodgy</button>
+
+<br><br>
 <a href="/leaderboard/">View Leaderboard</a>
+
+<script>
+
+function showRobotCheck() {
+    document.getElementById("robot-check").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+}
+
+function closeRobotCheck() {
+    document.getElementById("robot-check").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+
+    // reset state
+    document.getElementById("robot-error").style.display = "none";
+    document.querySelectorAll("input[name='robot_answer']").forEach(r => r.checked = false);
+}
+
+// click outside = close
+document.getElementById("overlay").onclick = closeRobotCheck;
+
+function checkRobot() {
+    const selected = document.querySelector("input[name='robot_answer']:checked");
+    const error = document.getElementById("robot-error");
+
+    if (!selected) {
+        error.innerText = "Pick an answer first.";
+        error.style.display = "block";
+        return;
+    }
+
+    if (selected.value === "1") {
+        // ✅ correct → just close popup (no form here)
+        closeRobotCheck();
+    } else {
+        // ❌ wrong → show error + reset
+        error.innerText = "Wrong answer. Try again.";
+        error.style.display = "block";
+
+        document.querySelectorAll("input[name='robot_answer']").forEach(r => r.checked = false);
+    }
+}
+
+</script>
