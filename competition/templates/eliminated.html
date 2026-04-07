@@ -4,13 +4,14 @@
 .option-card {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px;
+    gap: 15px;
+    padding: 14px;
     border: 2px solid #ddd;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
     cursor: pointer;
     transition: 0.2s;
+    font-size: 16px;
 }
 
 .option-card:hover {
@@ -47,29 +48,31 @@ top:50%;
 left:50%;
 transform:translate(-50%, -50%);
 background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 20px rgba(0,0,0,0.3);
+padding:30px;
+border-radius:14px;
+box-shadow:0 0 30px rgba(0,0,0,0.4);
 z-index:1000;
+width:420px;
+max-width:90%;
 ">
 
-    <h3>Dodgiest Bloke</h3>
+    <h3 style="font-size:22px; margin-bottom:15px;">Dodgiest Bloke</h3>
 
     <label class="option-card">
         <input type="radio" name="robot_answer" value="1">
-        <img src="{% static 'images/Nashy.jpg' %}" width="80">
+        <img src="{% static 'images/Nashy.jpg' %}" width="200" height="200">
         Nashy
     </label>
 
     <label class="option-card">
         <input type="radio" name="robot_answer" value="2">
-        <img src="{% static 'images/coops.png' %}" width="80">
+        <img src="{% static 'images/coops.png' %}" width="200" height="200">
         Herbert the Pervert 
     </label>
 
     <label class="option-card">
         <input type="radio" name="robot_answer" value="3">
-        <img src="{% static 'images/nahu.jpg' %}" width="80">
+        <img src="{% static 'images/nahu.jpg' %}" width="200" height="200">
         Netanyahu (Big Yahu)
     </label>
 
